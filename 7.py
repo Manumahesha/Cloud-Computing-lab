@@ -1,26 +1,28 @@
-def generate_public_key(prime, base, private_key):
-    return pow(base, private_key, prime)
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives import serialization
 
-def generate_shared_secret(public_key, private_key, prime):
-    return pow(public_key, private_key, prime)
+private_key = ec.generate_private_key(ec.SECP256R1())
+public_key = private_key.public_key()
 
-prime = int(input("Enter a large prime number (recommended 2048 bits): "))
-base = int(input("Enter a base (primitive root modulo of the prime): "))
-alice_private = int(input("Alice, enter your private key (a random integer less than prime): "))
-alice_public = generate_public_key(prime, base, alice_private)
-print("Alice's public key:", alice_public)
+public_pem = public_key.public_bytes(
+    encoding=serialization.Encoding.PEM,
+    format=serialization.PublicFormat.SubjectPublicKeyInfo
+)
 
-bob_private = int(input("Bob, enter your private key (a random integer less than prime): "))
-bob_public = generate_public_key(prime, base, bob_private)
-print("Bob's public key:", bob_public)
+print("Public key in PEM format:\n", public_pem.decode())
 
-alice_shared_secret = generate_shared_secret(bob_public, alice_private, prime)
-bob_shared_secret = generate_shared_secret(alice_public, bob_private, prime)
+message = input("Enter a message to be signed: ").encode()
 
-print("Alice's shared secret:", alice_shared_secret)
-print("Bob's shared secret:", bob_shared_secret)
+signature = private_key.sign(
+    message,
+    ec.ECDSA(hashes.SHA256())
+)
 
-if alice_shared_secret == bob_shared_secret:
-    print("Success! The shared secret is", alice_shared_secret)
-else:
-    print("Error: Shared secrets do not match")
+print("Signature:", signature)
+
+try:
+    public_key.verify(signature, message, ec.ECDSA(hashes.SHA256()))
+    print("Signature is valid")
+except:
+    print("Signature verification failed.")
