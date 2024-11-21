@@ -24,3 +24,14 @@ if alice_shared_secret == bob_shared_secret:
     print("Success! The shared secret is", alice_shared_secret)
 else:
     print("Error: Shared secrets do not match")
+
+output
+Enter a large prime number (recommended 2048 bits): 23
+Enter a base (primitive root modulo of the prime): 5
+Alice, enter your private key (a random integer less than prime): 6
+Alice's public key: 8
+Bob, enter your private key (a random integer less than prime): 8
+Bob's public key: 16
+Alice's shared secret: 4
+Bob's shared secret: 4
+Success! The shared secret is 4
